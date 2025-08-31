@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '../../../utils/supabase';
 import { getAuth } from '@clerk/nextjs/server';
 
@@ -12,7 +12,7 @@ interface AttendanceRecordWithLecture {
   } | null;
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const { userId } = getAuth(req);
 
   if (!userId) {
