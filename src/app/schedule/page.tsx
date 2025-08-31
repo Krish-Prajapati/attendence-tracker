@@ -37,8 +37,9 @@ export default function ScheduleLecturePage() {
   const router = useRouter();
   const { userId } = useAuth();
 
-  const handleChange = (e: any) => {
-    setLecture({ ...lecture, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string | undefined; value: unknown }>) => {
+    const { name, value } = e.target;
+    setLecture({ ...lecture, [name as string]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,9 +72,9 @@ export default function ScheduleLecturePage() {
       console.log('Lecture added:', data);
       alert('Lecture scheduled successfully!');
       router.push('/'); // Redirect to home or a dashboard after success
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding lecture:', err);
-      setError(err.message || 'Failed to add lecture.');
+      setError((err as Error).message || 'Failed to add lecture.');
     } finally {
       setLoading(false);
     }

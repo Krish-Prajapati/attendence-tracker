@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 import { supabase } from '../../../utils/supabase';
 import { getAuth } from '@clerk/nextjs/server';
 
+interface AttendanceRecordWithLecture {
+  status: string;
+  date: string;
+  lectures: {
+    id: string;
+    subject: string;
+    type: string;
+  } | null;
+}
+
 export async function GET(req: Request) {
   const { userId } = getAuth(req);
 
@@ -39,14 +49,13 @@ export async function GET(req: Request) {
     }
 
     // Aggregate data
-    const aggregatedData: { [key: string]: { [key: string]: { present: number; absent: number; totalLectures: number } } } = {};
+    const aggregatedData: { [subject: string]: { [type: string]: { present: number; absent: number; totalLectures: number } } } = {};
 
-    for (const record of attendanceData) {
+    for (const record of attendanceData as AttendanceRecordWithLecture[]) {
       const lecture = record.lectures;
       if (lecture) {
         const subject = lecture.subject;
         const type = lecture.type;
-        const key = `${subject}-${type}`;
 
         if (!aggregatedData[subject]) {
           aggregatedData[subject] = {};
@@ -86,9 +95,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json(report);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API Error:', error);
-    return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });
+    return new NextResponse(JSON.stringify({ error: (error as Error).message }), { status: 500 });
   }
 }
 

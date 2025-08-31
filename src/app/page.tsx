@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import { SignInButton, UserButton, SignedIn, SignedOut, useAuth } from '@clerk/nextjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -48,15 +48,7 @@ export default function Home() {
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
-    if (isLoaded && userId) {
-      fetchLecturesAndAttendance();
-    } else if (isLoaded && !userId) {
-      setLoading(false);
-    }
-  }, [isLoaded, userId]);
-
-  const fetchLecturesAndAttendance = async () => {
+  const fetchLecturesAndAttendance = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -82,13 +74,21 @@ export default function Home() {
       }
       setAttendanceData(fetchedAttendance || []);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching data:', err);
-      setError(err.message || 'Failed to fetch data.');
+      setError((err as Error).message || 'Failed to fetch data.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (isLoaded && userId) {
+      fetchLecturesAndAttendance();
+    } else if (isLoaded && !userId) {
+      setLoading(false);
+    }
+  }, [isLoaded, userId, fetchLecturesAndAttendance]);
 
   // Calculate attendance percentages and check for low attendance
   const lowAttendanceAlerts: { subject: string; type: string; percentage: string }[] = [];

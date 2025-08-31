@@ -98,9 +98,9 @@ const AttendancePrompt: React.FC<AttendancePromptProps> = ({ lectures }) => {
       setAttendanceRecorded(true);
       setOpen(false);
       alert(`Attendance recorded as ${status} for ${currentLecture.subject}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error recording attendance:', err);
-      setError(err.message || 'Failed to record attendance.');
+      setError((err as Error).message || 'Failed to record attendance.');
     } finally {
       setLoading(false);
     }
